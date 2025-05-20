@@ -1,4 +1,6 @@
-public class Task {
+import java.io.Serializable;
+
+public class Task implements Serializable {
     private String name;
     private boolean completed;
 
@@ -17,5 +19,10 @@ public class Task {
 
     public void completeTask() {
         this.completed = true;
+    }
+
+    @Override
+    public String toString() {
+        return (completed ? "[✓] " : "[ ] ") + name;
     }
 }
