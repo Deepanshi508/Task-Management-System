@@ -82,10 +82,4 @@ public class TaskManagerGUI extends JFrame {
             taskListModel.addElement(t.toString());
         }
     }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            new TaskManagerGUI().setVisible(true);
-        });
-    }
 }
