@@ -24,15 +24,8 @@ public class TaskManager {
         saveTasks();
     }
 
-    public void listTasks() {
-        if (tasks.isEmpty()) {
-            System.out.println("No tasks found.");
-            return;
-        }
-        System.out.println("\nYour Tasks:");
-        for (Task task : tasks) {
-            System.out.println(task);
-        }
+    public List<Task> getTasks() {
+        return tasks;
     }
 
     private void saveTasks() {
@@ -49,13 +42,6 @@ public class TaskManager {
             tasks = (List<Task>) in.readObject();
         } catch (IOException | ClassNotFoundException e) {
             tasks = new ArrayList<>();
-        }
-    }
-}
-
-    public void listTasks() {
-        for (Task task : tasks) {
-            System.out.println("Task: " + task.getName() + " | Completed: " + task.isCompleted());
         }
     }
 }
