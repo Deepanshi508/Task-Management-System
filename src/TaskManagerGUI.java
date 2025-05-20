@@ -49,6 +49,7 @@ public class TaskManagerGUI extends JFrame {
 
         refreshTaskList();
 
+        // Button actions
         addButton.addActionListener(e -> {
             String name = taskNameInput.getText().trim();
             String prioStr = priorityInput.getText().trim();
@@ -77,7 +78,7 @@ public class TaskManagerGUI extends JFrame {
                 }
             }
 
-            if (!manager.addTask(new Task(name, priority, deadline))) {
+            if (!manager.addTask(new Task(name, priority, deadline == null ? "" : deadline.toString()))) {
                 JOptionPane.showMessageDialog(this, "Task with this name already exists.");
                 return;
             }
@@ -97,6 +98,8 @@ public class TaskManagerGUI extends JFrame {
             String taskName = extractTaskName(selected);
             if (manager.completeTask(taskName)) {
                 refreshTaskList();
+            } else {
+                JOptionPane.showMessageDialog(this, "Task is already completed or does not exist.");
             }
         });
 
@@ -109,6 +112,8 @@ public class TaskManagerGUI extends JFrame {
             String taskName = extractTaskName(selected);
             if (manager.deleteTask(taskName)) {
                 refreshTaskList();
+            } else {
+                JOptionPane.showMessageDialog(this, "Task could not be deleted.");
             }
         });
 
@@ -151,10 +156,31 @@ public class TaskManagerGUI extends JFrame {
             }
             refreshTaskList();
         });
+
+        // Optional: Disable buttons if no selection
+        taskList.addListSelectionListener(e -> {
+            boolean isSelected = taskList.getSelectedIndex() != -1;
+            completeButton.setEnabled(isSelected);
+            deleteButton.setEnabled(isSelected);
+            editButton.setEnabled(isSelected);
+        });
+
+        // Initially disable buttons as no task selected
+        completeButton.setEnabled(false);
+        deleteButton.setEnabled(false);
+        editButton.setEnabled(false);
     }
 
     private String extractTaskName(String listEntry) {
-        // Task name is before the first " | "
-        int idx = listEntry.indexOf(" | ");
+        int idx = listEntry.indexOf(" (Priority:");
         return (idx == -1) ? listEntry : listEntry.substring(0, idx);
     }
+
+    private void refreshTaskList() {
+        taskListModel.clear();
+        List<Task> tasks = manager.getAllTasksOrderedByPriority();
+        for (Task task : tasks) {
+            taskListModel.addElement(task.toString());
+        }
+    }
+}
