@@ -1,47 +1,75 @@
+import java.time.LocalDate;
 import java.util.*;
-import java.io.*;
 
 public class TaskManager {
-    private List<Task> tasks;
-    private final String FILE_NAME = "tasks.dat";
+    private PriorityQueue<Task> taskQueue;
+    private LinkedList<Task> taskList;  // maintains insertion order or history
+    private HashMap<String, Task> taskMap;
 
     public TaskManager() {
-        loadTasks();
+        taskQueue = new PriorityQueue<>();
+        taskList = new LinkedList<>();
+        taskMap = new HashMap<>();
     }
 
-    public void addTask(Task task) {
-        tasks.add(task);
-        saveTasks();
-    }
-
-    public void completeTask(String taskName) {
-        for (Task task : tasks) {
-            if (task.getName().equalsIgnoreCase(taskName)) {
-                task.completeTask();
-                break;
-            }
+    public boolean addTask(Task task) {
+        if (taskMap.containsKey(task.getName())) {
+            return false; // Task with same name exists
         }
-        saveTasks();
+        taskQueue.offer(task);
+        taskList.add(task);
+        taskMap.put(task.getName(), task);
+        return true;
     }
 
-    public List<Task> getTasks() {
-        return tasks;
-    }
-
-    private void saveTasks() {
-        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(FILE_NAME))) {
-            out.writeObject(tasks);
-        } catch (IOException e) {
-            System.out.println("Error saving tasks: " + e.getMessage());
+    public boolean completeTask(String taskName) {
+        Task task = taskMap.get(taskName);
+        if (task != null && !task.isCompleted()) {
+            task.completeTask();
+            return true;
         }
+        return false;
     }
 
-    @SuppressWarnings("unchecked")
-    private void loadTasks() {
-        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(FILE_NAME))) {
-            tasks = (List<Task>) in.readObject();
-        } catch (IOException | ClassNotFoundException e) {
-            tasks = new ArrayList<>();
+    public boolean editTask(String oldName, String newName, int newPriority, LocalDate newDeadline) {
+        Task task = taskMap.get(oldName);
+        if (task == null || taskMap.containsKey(newName)) {
+            return false;
         }
+        // Remove old task from priority queue (inefficient, but works for demo)
+        taskQueue.remove(task);
+        // Update task details
+        task.setName(newName);
+        task.setPriority(newPriority);
+        task.setDeadline(newDeadline);
+        // Add back to priority queue
+        taskQueue.offer(task);
+
+        // Update map key if name changed
+        if (!oldName.equals(newName)) {
+            taskMap.remove(oldName);
+            taskMap.put(newName, task);
+        }
+        return true;
+    }
+
+    public boolean deleteTask(String taskName) {
+        Task task = taskMap.remove(taskName);
+        if (task == null) {
+            return false;
+        }
+        taskQueue.remove(task);
+        taskList.remove(task);
+        return true;
+    }
+
+    public List<Task> getAllTasksOrderedByPriority() {
+        List<Task> list = new ArrayList<>(taskQueue);
+        Collections.sort(list);
+        return list;
+    }
+
+    public List<Task> getTasksInInsertionOrder() {
+        return new ArrayList<>(taskList);
     }
 }
