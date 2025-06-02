@@ -29,7 +29,7 @@ public class Task implements Comparable<Task> {
 
     @Override
     public int compareTo(Task other) {
-        // Lower priority number = higher priority (change if your logic differs)
+        // Lower priority number = higher priority
         int priorityCompare = Integer.compare(this.priority, other.priority);
         if (priorityCompare != 0) {
             return priorityCompare;
